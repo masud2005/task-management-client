@@ -2,6 +2,8 @@ import { useContext } from "react";
 import { FaGoogle } from "react-icons/fa";
 import { AuthContext } from "../providers/AuthProvider";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Authentication = () => {
     const { googleSignIn } = useContext(AuthContext);
@@ -9,17 +11,46 @@ const Authentication = () => {
     const location = useLocation();
     console.log(location);
 
-    const handleLogin = () => {
-        // console.log('click');
-        googleSignIn()
-            .then(result => {
-                console.log(result.user);
+    const handleLogin = async () => {
+        try {
+            const result = await googleSignIn();
+            console.log(result.user);
+
+            const userInfo = {
+                name: result?.user?.displayName,
+                email: result?.user?.email,
+                photo: result?.user?.photoURL,
+            };
+
+            // Fetch existing users from the database
+            const usersResponse = await axios.get('http://localhost:5000/users');
+            const users = usersResponse.data;
+            console.log(users);
+
+            // Check if the user already exists
+            if (users && users.length > 0) {
+                const existingUser = users.find(user => user.email === userInfo.email);
+                if (existingUser) {
+                    toast.success(`Welcome back, ${existingUser.name || 'User'}!`);
+                    return navigate('dashboard'); // ফাংশন এখানেই শেষ
+                }
+            }
+
+            // If user does not exist, add them to the database
+            const res = await axios.post('http://localhost:5000/users', userInfo);
+            // console.log(res.data);
+
+            if (res.data.insertedId) {
+                toast.success(`Welcome, ${userInfo.name || 'User'}! Your account has been created.`);
                 navigate('dashboard');
-            })
-            .catch(error => {
-                console.log(error.message);
-            })
+            }
+        } catch (error) {
+            console.error(error.message);
+            toast.error(`Error: ${error.message || 'Something went wrong. Please try again.'}`);
+        }
     };
+
+
 
     return (
         <>

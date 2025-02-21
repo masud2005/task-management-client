@@ -1,24 +1,61 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useContext, useState } from "react";
+import { toast } from "react-toastify";
+import { AuthContext } from "../providers/AuthProvider";
+import { useQuery } from "@tanstack/react-query";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [tasks, setTasks] = useState([]);
-    const [newTask, setNewTask] = useState({
-        title: "",
-        description: "",
-        category: "To-Do",
+    const { user } = useContext(AuthContext);
+
+    const { data: tasks = [], refetch } = useQuery({
+        queryKey: ["tasks", user?.email],
+        queryFn: async () => {
+            const res = await axios.get(`http://localhost:5000/all-task/${user?.email}`);
+            return res.data;
+        }
     });
 
-    const handleAddTask = () => {
-        if (newTask.title.trim() === "") return; // Validate title
-        setTasks([...tasks, { ...newTask, id: Date.now() }]);
-        setNewTask({ title: "", description: "", category: "To-Do" });
-        setIsModalOpen(false);
+    const handleAddTask = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const title = form.title.value;
+        const description = form.description.value;
+        const category = form.category.value;
+
+        const now = new Date();
+        const dateTimeUTC = now.toISOString();
+
+        const newTask = { title, description, category, dateTimeUTC, userEmail: user?.email };
+
+        try {
+            const res = await axios.post("http://localhost:5000/all-task", newTask);
+            if (res.data.insertedId) {
+                toast.success(`🎉 Task added successfully: "${title}"`);
+                refetch();
+                setIsModalOpen(false);
+            }
+        } catch (error) {
+            toast.error(`⚠️ An error occurred: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const handleDeleteTask = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+        try {
+            await axios.delete(`http://localhost:5000/task/${id}`);
+            toast.success("✅ Task deleted successfully!");
+            refetch();
+        } catch (error) {
+            toast.error(`❌ Failed to delete task: ${error.response?.data?.message || error.message}`);
+        }
     };
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
-            {/* হেডার এবং Add Task বাটন */}
+            {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">Task Management System</h1>
                 <button
@@ -29,7 +66,7 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            {/* টাস্ক কলাম */}
+            {/* Task Columns */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {["To-Do", "In Progress", "Done"].map((col) => (
                     <div key={col} className="p-4 border rounded-lg bg-gray-50 shadow-sm">
@@ -39,11 +76,27 @@ const Dashboard = () => {
                                 .filter((task) => task.category === col)
                                 .map((task) => (
                                     <div
-                                        key={task.id}
-                                        className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                                        key={task._id}
+                                        className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex justify-between items-center"
                                     >
-                                        <h3 className="font-semibold text-gray-800">{task.title}</h3>
-                                        <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-800">{task.title}</h3>
+                                            <p className="text-sm text-gray-500 mt-1">{task.description}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                className="text-blue-500 hover:text-blue-700"
+                                                onClick={() => console.log("Edit Task", task._id)}
+                                            >
+                                                <FaEdit size={18} />
+                                            </button>
+                                            <button
+                                                className="text-red-500 hover:text-red-700"
+                                                onClick={() => handleDeleteTask(task._id)}
+                                            >
+                                                <FaTrash size={18} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                         </div>
@@ -51,59 +104,66 @@ const Dashboard = () => {
                 ))}
             </div>
 
-            {/* Add Task মোডাল */}
+            {/* Add Task Modal */}
             {isModalOpen && (
                 <div className="modal modal-open">
                     <div className="modal-box max-w-[768px] px-3 py-8 relative">
                         <h2 className="text-xl font-bold mb-4 text-gray-800">Add New Task</h2>
-                        <input
-                            type="text"
-                            placeholder="Task Title"
-                            value={newTask.title}
-                            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                            className="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            maxLength={50}
-                        />
-                        <textarea
-                            placeholder="Description"
-                            value={newTask.description}
-                            onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                            className="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            maxLength={200}
-                        />
-                        <select
-                            value={newTask.category}
-                            onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
-                            className="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="To-Do">To-Do</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Done">Done</option>
-                        </select>
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                        <form onSubmit={handleAddTask}>
+                            <label>Task Title</label>
+                            <input
+                                type="text"
+                                placeholder="Task Title"
+                                name="title"
+                                className="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={50}
+                                required
+                            />
+                            <label>Task Description</label>
+                            <textarea
+                                placeholder="Description"
+                                name="description"
+                                className="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                maxLength={200}
+                                required
+                            />
+                            <label>Task Category</label>
+                            <select
+                                name="category"
+                                className="border p-2 rounded-lg w-full mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required
+                                defaultValue={''}
                             >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleAddTask}
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                            >
-                                Add Task
-                            </button>
-                        </div>
-                        <button
-                            className="btn btn-circle btn-outline fixed top-4 right-4 bg-red-300 hover:bg-red-500"
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            ✕
-                        </button>
+                                <option disabled value="">Select Category</option>
+                                <option value="To-Do">To-Do</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Done">Done</option>
+                            </select>
+                            <div className="flex justify-end gap-2">
+                                {/* <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                    Cancel
+                                </button> */}
+                                <button
+                                    className="btn btn-circle btn-outline fixed top-4 right-4 bg-red-300 hover:bg-red-500"
+                                    onClick={() => setIsModalOpen(false)}
+                                >
+                                    ✕
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    Add Task
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

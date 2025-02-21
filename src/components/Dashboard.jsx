@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { AuthContext } from "../providers/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,15 +43,41 @@ const Dashboard = () => {
     };
 
     const handleDeleteTask = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this task?")) return;
+        // if (!window.confirm("Are you sure you want to delete this task?")) return;
 
-        try {
-            await axios.delete(`http://localhost:5000/task/${id}`);
-            toast.success("✅ Task deleted successfully!");
-            refetch();
-        } catch (error) {
-            toast.error(`❌ Failed to delete task: ${error.response?.data?.message || error.message}`);
-        }
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await axios.delete(`http://localhost:5000/all-task/${id}`);
+                    toast.success("Task deleted successfully!");
+                    refetch();
+                    // Swal.fire({
+                    //     title: "Deleted!",
+                    //     text: "Your file has been deleted.",
+                    //     icon: "success"
+                    // });
+                } catch (error) {
+                    toast.error(`Failed to delete task: ${error.response?.data?.message || error.message}`);
+                }
+
+            }
+        });
+
+        // try {
+        //     await axios.delete(`http://localhost:5000/task/${id}`);
+        //     toast.success("✅ Task deleted successfully!");
+        //     refetch();
+        // } catch (error) {
+        //     toast.error(`❌ Failed to delete task: ${error.response?.data?.message || error.message}`);
+        // }
     };
 
     return (

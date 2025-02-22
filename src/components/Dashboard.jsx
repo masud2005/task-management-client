@@ -126,41 +126,51 @@ const Dashboard = () => {
 
                 {/* Task Columns */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {["To-Do", "In Progress", "Done"].map((col) => (
-                        <div key={col} className="p-4 border rounded-lg bg-gray-50 shadow-sm">
-                            <h2 className="text-xl font-bold mb-4 text-gray-700">{col}</h2>
-                            <div className="space-y-4">
-                                {tasks
-                                    .filter((task) => task.category === col)
-                                    .map((task) => (
-                                        <div
-                                            key={task._id}
-                                            className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex justify-between items-center"
-                                        >
-                                            <div>
-                                                <h3 className="font-semibold text-gray-800">{task.title}</h3>
-                                                <p className="text-sm text-gray-500 mt-1">{task.description}</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    className="text-blue-500 hover:text-blue-700"
-                                                    onClick={() => handleUpdateTask(task)}
-                                                >
-                                                    <FaEdit size={18} />
-                                                </button>
-                                                <button
-                                                    className="text-red-500 hover:text-red-700"
-                                                    onClick={() => handleDeleteTask(task._id)}
-                                                >
-                                                    <FaTrash size={18} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+    {["To-Do", "In Progress", "Done"].map((col, index) => (
+        <div
+            key={col}
+            className={`p-4 border rounded-lg shadow-sm ${
+                index === 0 ? 'bg-gradient-to-b from-blue-50 to-blue-100' :
+                index === 1 ? 'bg-gradient-to-b from-purple-50 to-purple-100' :
+                'bg-gradient-to-b from-green-50 to-green-100'
+            }`}
+        >
+            <h2 className="text-xl font-bold mb-4 text-gray-700">{col}</h2>
+            <div className="space-y-4">
+                {tasks
+                    .filter((task) => task.category === col)
+                    .map((task) => (
+                        <div
+                            key={task._id}
+                            className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-blue-500 flex justify-between items-center"
+                        >
+                            <div>
+                                <h3 className="font-semibold text-lg text-gray-800">{task.title}</h3>
+                                <p className="text-base text-gray-600 mt-1">{task.description}</p>
+                                <p className="text-sm text-gray-500 mt-2">
+                                    📅 {new Date(task.dateTimeUTC).toLocaleString()}
+                                </p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors"
+                                    onClick={() => handleUpdateTask(task)}
+                                >
+                                    <FaEdit size={18} />
+                                </button>
+                                <button
+                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                                    onClick={() => handleDeleteTask(task._id)}
+                                >
+                                    <FaTrash size={18} />
+                                </button>
                             </div>
                         </div>
                     ))}
-                </div>
+            </div>
+        </div>
+    ))}
+</div>
 
                 {/* Add Task Modal */}
                 {isModalOpen && (

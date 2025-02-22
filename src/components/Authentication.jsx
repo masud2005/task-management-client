@@ -88,7 +88,7 @@ const Authentication = () => {
 
                 {/* Call to Action */}
                 <div className="bg-blue-500 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <h2 className="text-2xl font-bold text-white mb-4">Ready to Get Started?</h2>
+                    <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
                     <p className="text-white mb-6">
                         Sign in with Google to access your personalized dashboard and start managing your tasks today.
                     </p>

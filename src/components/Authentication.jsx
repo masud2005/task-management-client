@@ -14,7 +14,7 @@ const Authentication = () => {
     const { data: users = [], isLoading } = useQuery({
         queryKey: ["users"],
         queryFn: async () => {
-            const res = await axios.get('http://localhost:5000/users');
+            const res = await axios.get('https://task-management-server-brown-xi.vercel.app/users');
             return res.data;
         },
     });
@@ -37,7 +37,7 @@ const Authentication = () => {
             }
 
             // If user does not exist, add them to the database
-            const res = await axios.post("http://localhost:5000/users", userInfo);
+            const res = await axios.post("https://task-management-server-brown-xi.vercel.app/users", userInfo);
             if (res.data.insertedId) {
                 toast.success(`Welcome, ${userInfo.name || "User"}! Your account has been created.`);
                 navigate("dashboard");

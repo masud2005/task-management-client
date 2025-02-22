@@ -30,7 +30,7 @@ const Column = ({ id, title, children }) => {
     const { data: tasks = [], refetch } = useQuery({
         queryKey: ["tasks", user?.email],
         queryFn: async () => {
-            const res = await axios.get(`http://localhost:5000/all-task/${user?.email}`);
+            const res = await axios.get(`https://task-management-server-brown-xi.vercel.app/all-task/${user?.email}`);
             // console.log(res.data);
             return res.data;
         },
@@ -144,7 +144,7 @@ const Dashboardd = () => {
     const { data: tasks = [], refetch } = useQuery({
         queryKey: ["tasks", user?.email],
         queryFn: async () => {
-            const res = await axios.get(`http://localhost:5000/all-task/${user?.email}`);
+            const res = await axios.get(`https://task-management-server-brown-xi.vercel.app/all-task/${user?.email}`);
             return res.data;
         },
     });
@@ -168,7 +168,7 @@ const Dashboardd = () => {
         const newTask = { title, description, category, dateTimeUTC, userEmail: user?.email, order };
 
         try {
-            const res = await axios.post("http://localhost:5000/all-task", newTask);
+            const res = await axios.post("https://task-management-server-brown-xi.vercel.app/all-task", newTask);
             if (res.data.insertedId) {
                 toast.success(`🎉 Task added successfully: "${title}"`);
                 refetch();
@@ -191,7 +191,7 @@ const Dashboardd = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const res = await axios.delete(`http://localhost:5000/all-task/${id}`);
+                    const res = await axios.delete(`https://task-management-server-brown-xi.vercel.app/all-task/${id}`);
                     if (res.data.deletedCount > 0) {
                         toast.success("Task deleted successfully!");
                         refetch();
@@ -217,7 +217,7 @@ const Dashboardd = () => {
         const updatedTask = { title, description, category };
 
         try {
-            const res = await axios.patch(`http://localhost:5000/all-task/${selectedTask._id}`, updatedTask);
+            const res = await axios.patch(`https://task-management-server-brown-xi.vercel.app/all-task/${selectedTask._id}`, updatedTask);
             if (res.data.modifiedCount > 0) {
                 toast.success("Task updated successfully!");
                 refetch();
@@ -250,7 +250,7 @@ const Dashboardd = () => {
             const newOrder = arrayMove(currentColumnTasks, oldIndex, newIndex);
             await Promise.all(
                 newOrder.map((task, index) =>
-                    axios.patch(`http://localhost:5000/all-task/${task._id}`, { order: index })
+                    axios.patch(`https://task-management-server-brown-xi.vercel.app/all-task/${task._id}`, { order: index })
                 )
             );
             toast.success("Task order updated!");
@@ -258,7 +258,7 @@ const Dashboardd = () => {
         } else {
             const targetColumnTasks = tasks.filter((t) => t.category === targetCategory);
             const newOrderIndex = targetColumnTasks.length;
-            await axios.patch(`http://localhost:5000/all-task/${active.id}`, {
+            await axios.patch(`https://task-management-server-brown-xi.vercel.app/all-task/${active.id}`, {
                 category: targetCategory,
                 order: newOrderIndex,
             });

@@ -20,8 +20,8 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="bg-gray-500 text-white py-4 px-2">
-            <div className="container mx-auto flex justify-between items-center">
+        <nav className="bg-gray-500 text-white py-4">
+            <div className="container mx-auto flex justify-between items-center px-2">
                 <h1 className="text-2xl font-bold">Task Manager</h1>
                 <div className="flex items-center gap-3">
                     {/* Profile Image with Tooltip */}

@@ -53,4 +53,4 @@ See the [package.json](./package.json) for the complete list of dependencies.
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/yourusername/task-management-client.git
+   git clone https://github.com/masud2005/task-management-client.git
